@@ -1,0 +1,48 @@
+root = true
+
+[*]
+charset = utf-8
+indent_size = 4
+indent_style = space
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+[*.{bat,cmd}]
+end_of_line = crlf
+indent_size = 2
+max_line_length = 120
+
+[*.{cjs,js,jsx,mjs,mts,ts,tsx}]
+indent_size = 2
+max_line_length = 120
+
+[*.go]
+indent_style = tab
+max_line_length = 120
+
+[{go.mod,go.sum}]
+indent_style = tab
+
+[*.json]
+indent_size = 2
+max_line_length = 120
+
+[*.{md,mdx}]
+indent_size = 2
+max_line_length = 120
+
+[.nvmrc]
+insert_final_newline = false
+
+[*.ps1]
+end_of_line = lf
+max_line_length = 120
+
+[*.sh]
+end_of_line = lf
+indent_size = 2
+max_line_length = 120
+
+[*.{yml,yaml}]
+indent_size = 2
+max_line_length = 120
