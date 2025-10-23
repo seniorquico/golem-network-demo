@@ -1,0 +1,14 @@
+version: "2"
+formatters:
+  enable:
+    - gofumpt
+    - goimports
+  settings:
+    gofumpt:
+      extra-rules: true
+      module-path: github.com/seniorquico/golem-network-demo/provider/ya-runtime-salad
+    goimports:
+      local-prefixes:
+        - github.com/seniorquico/golem-network-demo/provider/ya-runtime-salad
+linters:
+  default: all

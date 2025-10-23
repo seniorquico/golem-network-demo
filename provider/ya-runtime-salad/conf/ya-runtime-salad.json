@@ -1,0 +1,9 @@
+[
+  {
+    "name": "salad",
+    "version": "0.0.1",
+    "supervisor-path": "exe-unit",
+    "runtime-path": "ya-runtime-salad",
+    "description": "SaladCloud Runtime"
+  }
+]

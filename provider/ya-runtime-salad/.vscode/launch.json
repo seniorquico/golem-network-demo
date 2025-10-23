@@ -1,0 +1,17 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Launch",
+      "type": "go",
+      "request": "launch",
+      "mode": "debug",
+      "program": "${workspaceFolder}/cmd/ya-runtime-salad/main.go",
+      "args": ["version"],
+      "console": "integratedTerminal",
+      "env": {
+        "PATH": "$PATH:/usr/local/go/bin"
+      }
+    }
+  ]
+}
