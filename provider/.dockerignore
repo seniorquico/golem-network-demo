@@ -1,0 +1,6 @@
+/ya-runtime-salad
+!/ya-runtime-salad/conf/ya-runtime-salad.json
+!/ya-runtime-salad/ya-runtime-salad
+/.dockerignore
+/Dockerfile
+/README.md
