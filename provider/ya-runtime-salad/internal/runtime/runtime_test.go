@@ -3,18 +3,24 @@ package runtime
 import (
 	"bytes"
 	"context"
+	"os"
+	"path/filepath"
 	"testing"
 	"time"
+
+	"github.com/spf13/afero"
 )
 
 func TestVersionCommand(t *testing.T) {
 	t.Parallel()
 
+	fs := afero.NewMemMapFs()
 	stdout := bytes.Buffer{}
 	stderr := bytes.Buffer{}
 	exitCode := HandleInvocation(
 		context.Background(),
 		[]string{"/root/.local/lib/yagna/plugins/ya-runtime-test", "version"},
+		fs,
 		&stdout,
 		&stderr,
 	)
@@ -36,11 +42,13 @@ func TestVersionCommand(t *testing.T) {
 func TestTestCommand(t *testing.T) {
 	t.Parallel()
 
+	fs := afero.NewMemMapFs()
 	stdout := bytes.Buffer{}
 	stderr := bytes.Buffer{}
 	exitCode := HandleInvocation(
 		context.Background(),
 		[]string{"/root/.local/lib/yagna/plugins/ya-runtime-test", "test"},
+		fs,
 		&stdout,
 		&stderr,
 	)
@@ -59,34 +67,65 @@ func TestTestCommand(t *testing.T) {
 }
 
 func TestOfferTemplateCommand(t *testing.T) {
-	t.Parallel()
-
-	stdout := bytes.Buffer{}
-	stderr := bytes.Buffer{}
-	exitCode := HandleInvocation(
-		context.Background(),
-		[]string{"/root/.local/lib/yagna/plugins/ya-runtime-test", "offer-template"},
-		&stdout,
-		&stderr,
-	)
-
-	if exitCode != 0 {
-		t.Fatalf("Expected exit code 0, got %d", exitCode)
+	testCases := []struct {
+		name   string
+		config string
+		output string
+	}{
+		{
+			name:   "cpu",
+			config: `{"golem.inf.cpu.brand":"Intel(R) Core(TM) i9-14900K","golem.inf.cpu.model":"Stepping 1 Family 6 Model 183","golem.inf.cpu.vendor":"GenuineIntel"}`,
+			output: `{"constraints":"","properties":{"golem.inf.cpu.brand":"Intel(R) Core(TM) i9-14900K","golem.inf.cpu.model":"Stepping 1 Family 6 Model 183","golem.inf.cpu.vendor":"GenuineIntel","golem.runtime.capabilities":[]}}`,
+		},
+		{
+			name:   "gpu",
+			config: `{"golem.!exp.gap-35.v1.inf.gpu.clocks.graphics.mhz":2100,"golem.!exp.gap-35.v1.inf.gpu.clocks.memory.mhz":7001,"golem.!exp.gap-35.v1.inf.gpu.clocks.sm.mhz":2100,"golem.!exp.gap-35.v1.inf.gpu.clocks.video.mhz":1950,"golem.!exp.gap-35.v1.inf.gpu.cuda.compute-capability":"8.6","golem.!exp.gap-35.v1.inf.gpu.cuda.cores":4864,"golem.!exp.gap-35.v1.inf.gpu.cuda.enabled":true,"golem.!exp.gap-35.v1.inf.gpu.cuda.version":"13.0","golem.!exp.gap-35.v1.inf.gpu.memory.bandwidth.gib":448.0,"golem.!exp.gap-35.v1.inf.gpu.memory.total.gib":8.0,"golem.!exp.gap-35.v1.inf.gpu.model":"NVIDIA GeForce RTX 3060 Ti","golem.inf.cpu.brand":"Intel(R) Core(TM) i9-14900K","golem.inf.cpu.model":"Stepping 1 Family 6 Model 183","golem.inf.cpu.vendor":"GenuineIntel"}`,
+			output: `{"constraints":"","properties":{"golem.!exp.gap-35.v1.inf.gpu.clocks.graphics.mhz":2100,"golem.!exp.gap-35.v1.inf.gpu.clocks.memory.mhz":7001,"golem.!exp.gap-35.v1.inf.gpu.clocks.sm.mhz":2100,"golem.!exp.gap-35.v1.inf.gpu.clocks.video.mhz":1950,"golem.!exp.gap-35.v1.inf.gpu.cuda.compute-capability":"8.6","golem.!exp.gap-35.v1.inf.gpu.cuda.cores":4864,"golem.!exp.gap-35.v1.inf.gpu.cuda.enabled":true,"golem.!exp.gap-35.v1.inf.gpu.cuda.version":"13.0","golem.!exp.gap-35.v1.inf.gpu.memory.bandwidth.gib":448,"golem.!exp.gap-35.v1.inf.gpu.memory.total.gib":8,"golem.!exp.gap-35.v1.inf.gpu.model":"NVIDIA GeForce RTX 3060 Ti","golem.inf.cpu.brand":"Intel(R) Core(TM) i9-14900K","golem.inf.cpu.model":"Stepping 1 Family 6 Model 183","golem.inf.cpu.vendor":"GenuineIntel","golem.runtime.capabilities":["!exp:gpu"]}}`,
+		},
 	}
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
 
-	expectedOutput := `{"constraints":"","properties":{"golem.!exp.gap-35.v1.inf.gpu.clocks.graphics.mhz":2100,"golem.!exp.gap-35.v1.inf.gpu.clocks.memory.mhz":7001,"golem.!exp.gap-35.v1.inf.gpu.clocks.sm.mhz":2100,"golem.!exp.gap-35.v1.inf.gpu.clocks.video.mhz":1950,"golem.!exp.gap-35.v1.inf.gpu.cuda.compute-capability":"8.6","golem.!exp.gap-35.v1.inf.gpu.cuda.cores":4864,"golem.!exp.gap-35.v1.inf.gpu.cuda.enabled":true,"golem.!exp.gap-35.v1.inf.gpu.cuda.version":"13.0","golem.!exp.gap-35.v1.inf.gpu.memory.bandwidth.gib":448,"golem.!exp.gap-35.v1.inf.gpu.memory.total.gib":8,"golem.!exp.gap-35.v1.inf.gpu.model":"NVIDIA GeForce RTX 3060 Ti","golem.inf.cpu.brand":"Intel(R) Core(TM) i9-14900K","golem.inf.cpu.model":"Stepping 1 Family 6 Model 183","golem.inf.cpu.vendor":"GenuineIntel","golem.runtime.capabilities":["!exp:gpu"]}}` + "\n"
-	if stdout.String() != expectedOutput {
-		t.Fatalf("Expected stdout %q, got %q", expectedOutput, stdout.String())
-	}
+			fs := afero.NewMemMapFs()
+			userConfigDir, err := os.UserConfigDir()
+			if err != nil {
+				t.Fatalf("Failed to get user config dir: %v", err)
+			}
 
-	if stderr.Len() != 0 {
-		t.Fatalf("Expected empty stderr, got %q", stderr.String())
+			path := filepath.Join(userConfigDir, "ya-runtime-salad", "template.json")
+			afero.WriteFile(fs, path, []byte(tc.config), 0o600)
+
+			stdout := bytes.Buffer{}
+			stderr := bytes.Buffer{}
+			exitCode := HandleInvocation(
+				context.Background(),
+				[]string{"/root/.local/lib/yagna/plugins/ya-runtime-test", "offer-template"},
+				fs,
+				&stdout,
+				&stderr,
+			)
+
+			if exitCode != 0 {
+				t.Fatalf("Expected exit code 0, got %d", exitCode)
+			}
+
+			expectedOutput := tc.output + "\n"
+			if stdout.String() != expectedOutput {
+				t.Fatalf("Expected stdout %q, got %q", expectedOutput, stdout.String())
+			}
+
+			if stderr.Len() != 0 {
+				t.Fatalf("Expected empty stderr, got %q", stderr.String())
+			}
+		})
 	}
 }
 
 func TestDeployCommand(t *testing.T) {
 	t.Parallel()
 
+	fs := afero.NewMemMapFs()
 	stdout := bytes.Buffer{}
 	stderr := bytes.Buffer{}
 	exitCode := HandleInvocation(
@@ -100,6 +139,7 @@ func TestDeployCommand(t *testing.T) {
 			"deploy",
 			"--",
 		},
+		fs,
 		&stdout,
 		&stderr,
 	)
@@ -121,6 +161,7 @@ func TestDeployCommand(t *testing.T) {
 func TestStartCommand(t *testing.T) {
 	t.Parallel()
 
+	fs := afero.NewMemMapFs()
 	stdout := bytes.Buffer{}
 	stderr := bytes.Buffer{}
 	exitCode := HandleInvocation(
@@ -134,6 +175,7 @@ func TestStartCommand(t *testing.T) {
 			"start",
 			"--",
 		},
+		fs,
 		&stdout,
 		&stderr,
 	)
@@ -175,6 +217,7 @@ func TestRunCommand(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
 
+			fs := afero.NewMemMapFs()
 			stdout := bytes.Buffer{}
 			stderr := bytes.Buffer{}
 			exitCode := HandleInvocation(
@@ -191,6 +234,7 @@ func TestRunCommand(t *testing.T) {
 					"--",
 					tc.args,
 				},
+				fs,
 				&stdout,
 				&stderr,
 			)
@@ -222,6 +266,7 @@ func TestRunCommand(t *testing.T) {
 func TestRunCommandCancel(t *testing.T) {
 	t.Parallel()
 
+	fs := afero.NewMemMapFs()
 	stdout := bytes.Buffer{}
 	stderr := bytes.Buffer{}
 	ctx, cancel := context.WithCancel(context.Background())
@@ -243,6 +288,7 @@ func TestRunCommandCancel(t *testing.T) {
 			"--",
 			`{"duration":5,"frequency":2}`,
 		},
+		fs,
 		&stdout,
 		&stderr,
 	)

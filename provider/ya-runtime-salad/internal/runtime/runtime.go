@@ -5,19 +5,23 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"os"
+	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/akamensky/argparse"
+	"github.com/spf13/afero"
 )
 
 type runCommandArgs struct {
 	// Duration of run (in seconds). Must be a positive multiple of frequency. Defaults to 300.
-	Duration int `json:"duration"`
+	Duration *int `json:"duration,omitempty"`
 	// Frequency of updates (in seconds). Must be a positive number. Defaults to 60.
-	Frequency int `json:"frequency"`
+	Frequency *int `json:"frequency,omitempty"`
 }
 
-func HandleInvocation(ctx context.Context, argv []string, stdout, stderr io.Writer) int {
+func HandleInvocation(ctx context.Context, argv []string, fs afero.Fs, stdout, stderr io.Writer) int {
 	parser := argparse.NewParser("ya-runtime-salad", "SaladCloud Runtime")
 	command := parser.StringPositional(nil)
 	_ = parser.String("", "cpu-cores", nil)
@@ -57,25 +61,34 @@ func HandleInvocation(ctx context.Context, argv []string, stdout, stderr io.Writ
 	case "test":
 		return 0
 	case "offer-template":
+		properties, err := loadTemplateProperties(fs)
+		if err != nil {
+			fmt.Fprintf(stderr, "failed to load offer template properties: %v\n", err)
+			return 1
+		}
+
+		hasCapabilities := false
+		hasGPU := false
+		for k := range properties {
+			if k == "golem.runtime.capabilities" {
+				hasCapabilities = true
+			}
+			if strings.HasPrefix(k, "golem.!exp.gap-35.v1.") {
+				hasGPU = true
+			}
+		}
+
+		if !hasCapabilities {
+			if hasGPU {
+				properties["golem.runtime.capabilities"] = []string{"!exp:gpu"}
+			} else {
+				properties["golem.runtime.capabilities"] = []string{}
+			}
+		}
+
 		template := map[string]any{
 			"constraints": "",
-			"properties": map[string]any{
-				"golem.!exp.gap-35.v1.inf.gpu.clocks.graphics.mhz":     2100,
-				"golem.!exp.gap-35.v1.inf.gpu.clocks.memory.mhz":       7001,
-				"golem.!exp.gap-35.v1.inf.gpu.clocks.sm.mhz":           2100,
-				"golem.!exp.gap-35.v1.inf.gpu.clocks.video.mhz":        1950,
-				"golem.!exp.gap-35.v1.inf.gpu.cuda.compute-capability": "8.6",
-				"golem.!exp.gap-35.v1.inf.gpu.cuda.cores":              4864,
-				"golem.!exp.gap-35.v1.inf.gpu.cuda.enabled":            true,
-				"golem.!exp.gap-35.v1.inf.gpu.cuda.version":            "13.0",
-				"golem.!exp.gap-35.v1.inf.gpu.memory.bandwidth.gib":    448.0,
-				"golem.!exp.gap-35.v1.inf.gpu.memory.total.gib":        8.0,
-				"golem.!exp.gap-35.v1.inf.gpu.model":                   "NVIDIA GeForce RTX 3060 Ti",
-				"golem.inf.cpu.brand":                                  "Intel(R) Core(TM) i9-14900K",
-				"golem.inf.cpu.model":                                  "Stepping 1 Family 6 Model 183",
-				"golem.inf.cpu.vendor":                                 "GenuineIntel",
-				"golem.runtime.capabilities":                           []string{"!exp:gpu"},
-			},
+			"properties":  properties,
 		}
 		enc := json.NewEncoder(stdout)
 		enc.SetEscapeHTML(false)
@@ -107,14 +120,18 @@ func HandleInvocation(ctx context.Context, argv []string, stdout, stderr io.Writ
 		if len(argv) > (cut + 1) {
 			var args runCommandArgs
 			if err := json.Unmarshal([]byte(argv[cut+1]), &args); err == nil {
-				durationSeconds = args.Duration
-				if durationSeconds <= 0 {
-					durationSeconds = 1
+				if args.Duration != nil {
+					durationSeconds = *args.Duration
+					if durationSeconds <= 0 {
+						durationSeconds = 1
+					}
 				}
 
-				frequencySeconds = args.Frequency
-				if frequencySeconds <= 0 {
-					frequencySeconds = 1
+				if args.Frequency != nil {
+					frequencySeconds = *args.Frequency
+					if frequencySeconds <= 0 {
+						frequencySeconds = 1
+					}
 				}
 			}
 		}
@@ -144,4 +161,23 @@ func HandleInvocation(ctx context.Context, argv []string, stdout, stderr io.Writ
 		fmt.Fprintf(stderr, "unknown command: %s\n", c)
 		return 1
 	}
+}
+
+func loadTemplateProperties(fs afero.Fs) (map[string]any, error) {
+	userConfigDir, err := os.UserConfigDir()
+	if err != nil {
+		return nil, err
+	}
+	path := filepath.Join(userConfigDir, "ya-runtime-salad", "template.json")
+	f, err := fs.Open(path)
+	if err != nil {
+		return nil, err
+	}
+	defer f.Close()
+	var properties map[string]any
+	dec := json.NewDecoder(f)
+	if err := dec.Decode(&properties); err != nil {
+		return nil, err
+	}
+	return properties, nil
 }

@@ -76,6 +76,13 @@ yagna service run
 
 ## Configuring
 
+Create an offer template configuration file:
+
+- **Windows**: `%APPDATA%\ya-runtime-salad\template.json`
+- **Linux**: `~/.config/ya-runtime-salad/template.json`
+
+See the `examples` directory for examples.
+
 Create a provider preset to make the runtime available for requestors:
 
 ```json
@@ -91,8 +98,8 @@ Create a provider preset to make the runtime available for requestors:
       "pricing-model": "linear",
       "initial-price": 0.0,
       "usage-coeffs": {
-        "golem.usage.cpu_sec": 0.0001,
-        "golem.usage.duration_sec": 0.0001
+        "golem.usage.cpu_sec": 0.0,
+        "golem.usage.duration_sec": 1.0e-6
       }
     }
   ]

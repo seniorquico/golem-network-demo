@@ -26,6 +26,8 @@ RUN mkdir /staging-rootfs && \
 
 RUN cp /etc/passwd /etc/group /staging-rootfs/etc && \
     install -o ubuntu -g ubuntu -d /staging-rootfs/home/ubuntu && \
+    install -o ubuntu -g ubuntu -d /staging-rootfs/home/ubuntu/.config && \
+    install -o ubuntu -g ubuntu -d /staging-rootfs/home/ubuntu/.config/ya-runtime-salad && \
     install -o ubuntu -g ubuntu -d /staging-rootfs/home/ubuntu/.local && \
     install -o ubuntu -g ubuntu -d /staging-rootfs/home/ubuntu/.local/bin && \
     install -o ubuntu -g ubuntu -d /staging-rootfs/home/ubuntu/.local/lib && \

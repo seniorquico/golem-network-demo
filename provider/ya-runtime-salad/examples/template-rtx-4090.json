@@ -1,0 +1,16 @@
+{
+  "golem.!exp.gap-35.v1.inf.gpu.clocks.graphics.mhz": 2520,
+  "golem.!exp.gap-35.v1.inf.gpu.clocks.memory.mhz": 1313,
+  "golem.!exp.gap-35.v1.inf.gpu.clocks.sm.mhz": 2520,
+  "golem.!exp.gap-35.v1.inf.gpu.clocks.video.mhz": 2520,
+  "golem.!exp.gap-35.v1.inf.gpu.cuda.compute-capability": "8.9",
+  "golem.!exp.gap-35.v1.inf.gpu.cuda.cores": 16384,
+  "golem.!exp.gap-35.v1.inf.gpu.cuda.enabled": true,
+  "golem.!exp.gap-35.v1.inf.gpu.cuda.version": "13.0",
+  "golem.!exp.gap-35.v1.inf.gpu.memory.bandwidth.gib": 1008.0,
+  "golem.!exp.gap-35.v1.inf.gpu.memory.total.gib": 24.0,
+  "golem.!exp.gap-35.v1.inf.gpu.model": "NVIDIA GeForce RTX 4090",
+  "golem.inf.cpu.brand": "Intel(R) Core(TM) i7-13800HE",
+  "golem.inf.cpu.model": "Stepping 2 Family 6 Model 186",
+  "golem.inf.cpu.vendor": "GenuineIntel"
+}

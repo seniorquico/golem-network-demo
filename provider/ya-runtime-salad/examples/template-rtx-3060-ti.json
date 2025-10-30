@@ -1,0 +1,16 @@
+{
+  "golem.!exp.gap-35.v1.inf.gpu.clocks.graphics.mhz": 1950,
+  "golem.!exp.gap-35.v1.inf.gpu.clocks.memory.mhz": 1750,
+  "golem.!exp.gap-35.v1.inf.gpu.clocks.sm.mhz": 1950,
+  "golem.!exp.gap-35.v1.inf.gpu.clocks.video.mhz": 1950,
+  "golem.!exp.gap-35.v1.inf.gpu.cuda.compute-capability": "8.6",
+  "golem.!exp.gap-35.v1.inf.gpu.cuda.cores": 4864,
+  "golem.!exp.gap-35.v1.inf.gpu.cuda.enabled": true,
+  "golem.!exp.gap-35.v1.inf.gpu.cuda.version": "13.0",
+  "golem.!exp.gap-35.v1.inf.gpu.memory.bandwidth.gib": 448.0,
+  "golem.!exp.gap-35.v1.inf.gpu.memory.total.gib": 8.0,
+  "golem.!exp.gap-35.v1.inf.gpu.model": "NVIDIA GeForce RTX 3060 Ti",
+  "golem.inf.cpu.brand": "Intel(R) Core(TM) i9-14900K",
+  "golem.inf.cpu.model": "Stepping 1 Family 6 Model 183",
+  "golem.inf.cpu.vendor": "GenuineIntel"
+}
