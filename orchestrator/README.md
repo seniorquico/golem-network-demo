@@ -1,4 +1,4 @@
-# Golem Requestor Prototype
+# Golem Orchestrator Prototype
 
 This project demonstrates how to use the Golem Network JavaScript SDK to lease compute resources from decentralized providers on the Golem Network. It is configured for the Polygon Amoy testnet by default.
 
