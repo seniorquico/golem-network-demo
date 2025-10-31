@@ -64,13 +64,13 @@ Next, copy the rates into the `examples/presets-X.json` files (replacing the pla
 Finally, run the Docker containers:
 
 ```bash
-docker container run --detach --cpus="2" --memory="1g" --env-file ./examples/provider1.env --rm --volume ./ya-runtime-salad/examples/template-rtx-3060-ti.json:/home/ubuntu/.config/ya-runtime-salad/template.json:ro --volume ./examples/presets-rtx-3060-ti.json:/home/ubuntu/.local/share/ya-provider/presets.json:ro golem-provider:latest run --no-interactive
+docker container run --cpus="2" --detach --env-file ./examples/provider1.env --memory="1g" --name golem_provider_1 --rm --volume ./ya-runtime-salad/examples/template-rtx-3060-ti.json:/home/ubuntu/.config/ya-runtime-salad/template.json:ro --volume ./examples/presets-rtx-3060-ti.json:/home/ubuntu/.local/share/ya-provider/presets.json:ro golem-provider:latest run --no-interactive
 ```
 
 ```bash
-docker container run --detach --cpus="2" --memory="1g" --env-file ./examples/provider2.env --rm --volume ./ya-runtime-salad/examples/template-rtx-4090.json:/home/ubuntu/.config/ya-runtime-salad/template.json:ro --volume ./examples/presets-rtx-4090.json:/home/ubuntu/.local/share/ya-provider/presets.json:ro golem-provider:latest run --no-interactive
+docker container run --cpus="2" --detach --env-file ./examples/provider2.env --memory="1g" --name golem_provider_2 --rm --volume ./ya-runtime-salad/examples/template-rtx-4090.json:/home/ubuntu/.config/ya-runtime-salad/template.json:ro --volume ./examples/presets-rtx-4090.json:/home/ubuntu/.local/share/ya-provider/presets.json:ro golem-provider:latest run --no-interactive
 ```
 
 ```bash
-docker container run --detach --cpus="2" --memory="1g" --env-file ./examples/provider3.env --rm --volume ./ya-runtime-salad/examples/template-rtx-4090.json:/home/ubuntu/.config/ya-runtime-salad/template.json:ro --volume ./examples/presets-rtx-4090.json:/home/ubuntu/.local/share/ya-provider/presets.json:ro golem-provider:latest run --no-interactive
+docker container run --cpus="2" --detach --env-file ./examples/provider3.env --memory="1g" --name golem_provider_3 --rm --volume ./ya-runtime-salad/examples/template-rtx-4090.json:/home/ubuntu/.config/ya-runtime-salad/template.json:ro --volume ./examples/presets-rtx-4090.json:/home/ubuntu/.local/share/ya-provider/presets.json:ro golem-provider:latest run --no-interactive
 ```

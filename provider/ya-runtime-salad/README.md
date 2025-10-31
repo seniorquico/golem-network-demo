@@ -98,7 +98,6 @@ Create a provider preset to make the runtime available for requestors:
       "pricing-model": "linear",
       "initial-price": 0.0,
       "usage-coeffs": {
-        "golem.usage.cpu_sec": 0.0,
         "golem.usage.duration_sec": 1.0e-6
       }
     }
