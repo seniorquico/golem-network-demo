@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: puller
+  namespace: providers
+spec:
+  selector:
+    matchLabels:
+      name: puller
+  template:
+    metadata:
+      labels:
+        name: puller
+    spec:
+      initContainers:
+        - name: puller-golem-provider
+          image: saladtechnologies/golem-provider:v0.17.6-1
+          command: ["/home/ubuntu/.local/bin/golemsp", "--version"]
+      containers:
+        - name: pause
+          image: gcr.io/google-containers/pause:3.2
+          resources:
+            limits:
+              cpu: 1m
+              memory: 8Mi
+            requests:
+              cpu: 1m
+              memory: 8Mi

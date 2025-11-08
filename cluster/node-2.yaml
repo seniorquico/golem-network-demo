@@ -1,0 +1,44 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: node-2
+  namespace: providers
+spec:
+  containers:
+    - name: golem-provider
+      image: saladtechnologies/golem-provider:v0.17.6-1
+      imagePullPolicy: Never
+      args: ["run", "--no-interactive"]
+      resources:
+        limits:
+          cpu: "2"
+          memory: "1Gi"
+        requests:
+          cpu: "100m"
+          memory: "256Mi"
+      envFrom:
+        - secretRef:
+            name: config-node-2
+      volumeMounts:
+        - name: template-volume
+          mountPath: /home/ubuntu/.config/ya-runtime-salad/template.json
+          subPath: template.json
+          readOnly: true
+        - name: preset-volume
+          mountPath: /home/ubuntu/.local/share/ya-provider/presets.json
+          subPath: presets.json
+          readOnly: true
+  volumes:
+    - name: template-volume
+      configMap:
+        name: template-node-2
+        items:
+          - key: template.json
+            path: template.json
+    - name: preset-volume
+      configMap:
+        name: presets-rtx-4090
+        items:
+          - key: presets.json
+            path: presets.json
+  restartPolicy: Never

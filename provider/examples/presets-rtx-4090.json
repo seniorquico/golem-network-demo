@@ -17,7 +17,8 @@
       "pricing-model": "linear",
       "initial-price": 0.0,
       "usage-coeffs": {
-        "golem.usage.duration_sec": 1.0e-6
+        "golem.usage.cpu_sec": 0,
+        "golem.usage.duration_sec": 2.4059e-4
       }
     }
   ]
